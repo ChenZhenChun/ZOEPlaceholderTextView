@@ -9,19 +9,19 @@
 #import "ZOEPlaceholderTextView.h"
 
 @interface ZOEPlaceholderTextView()
-    {
-        NSInteger     oldLength;
-    }
-    @property (nonatomic,strong) UILabel *placeHolderLabel;
-    @property (nonatomic,assign) NSInteger limit;
-    @property (nonatomic,strong) UILabel *countLabelTemp;//计数
-    @property (nonatomic,copy) void (^MyBlock)();
-    @end
+{
+    NSInteger     oldLength;
+}
+@property (nonatomic,strong) UILabel *placeHolderLabel;
+@property (nonatomic,assign) NSInteger limit;
+@property (nonatomic,strong) UILabel *countLabelTemp;//计数
+@property (nonatomic,copy) void (^MyBlock)();
+@end
 
 @implementation ZOEPlaceholderTextView
-    @synthesize countLabel = _countLabel;
-    
-    
+@synthesize countLabel = _countLabel;
+
+
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
@@ -29,18 +29,18 @@
     }
     return self;
 }
-    
+
 - (void)awakeFromNib {
     [super awakeFromNib];
     [self initConfig];
 }
-    
+
 - (void)initConfig {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textChanged:) name:UITextViewTextDidChangeNotification object:nil];
     _textViewContainerInset = UIEdgeInsetsMake(8,4,8,4);
     [self setTextContainerInset:_textViewContainerInset];
 }
-    
+
 - (void)setTextViewContainerInset:(UIEdgeInsets)textViewContainerInset {
     _textViewContainerInset = textViewContainerInset;
     [self setTextContainerInset:textViewContainerInset];
@@ -52,18 +52,18 @@
         [_placeHolderLabel sizeToFit];
     }
 }
-    
+
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
-    
+
 - (void)setPlaceholder:(NSString *)placeholder {
     _placeholder = placeholder;
     self.placeHolderLabel.text = self.placeholder;
     [self.placeHolderLabel sizeToFit];
     [self sendSubviewToBack:self.placeHolderLabel];
 }
-    
+
 - (UILabel *)placeHolderLabel {
     if (!_placeHolderLabel) {
         _placeHolderLabel = [[UILabel alloc] initWithFrame:CGRectMake(_textViewContainerInset.left+4,
@@ -81,7 +81,7 @@
     }
     return _placeHolderLabel;
 }
-    
+
 - (void)setText:(NSString *)text {
     [super setText:text];
     if(text.length == 0 && self.placeholder.length > 0) {
@@ -89,7 +89,7 @@
     }
     [self textChanged:nil];
 }
-    
+
 - (UILabel *)countLabelTemp {
     if (!_countLabelTemp) {
         _countLabelTemp = [[UILabel alloc]init];
@@ -105,7 +105,7 @@
     }
     return _countLabelTemp;
 }
-    
+
 - (void)textChanged:(NSNotification *)notification {
     if(self.placeholder.length != 0) {
         [UIView animateWithDuration:0.25 animations:^{
@@ -121,33 +121,42 @@
         self.text = [self.text substringToIndex:oldLength];
         return;
     }
-    if (self.limit && _MyBlock && [self charNumber]/2.0>self.limit && !self.markedTextRange) {
-        _MyBlock();
-        self.text = [self.text substringToIndex:oldLength];
-    }else {
-        if(!self.markedTextRange) {
-            oldLength = self.text.length;
-            if (_limit) {
+    if (!self.limit||!_MyBlock)return;
+    if (_charVerifyType == Char) {
+        if ([self charNumber]/2.0>self.limit && !self.markedTextRange) {
+            _MyBlock();
+            self.text = [self.text substringToIndex:oldLength];
+        }else {
+            if(!self.markedTextRange) {
+                oldLength = self.text.length;
                 self.countLabelTemp.text = [NSString stringWithFormat:@"%d/%ld",(int)floor([self charNumber]/2.0),(long)_limit];
             }
         }
+    }else if (_charVerifyType == Length) {
+        if (self.text.length>self.limit && !self.markedTextRange) {
+            _MyBlock();
+            self.text = [self.text substringToIndex:oldLength];
+        }else {
+            if(!self.markedTextRange) {
+                oldLength = self.text.length;
+                self.countLabelTemp.text = [NSString stringWithFormat:@"%ld/%ld",(long)oldLength,(long)_limit];
+            }
+        }
     }
-    
-    
 }
-    
+
 - (UILabel *)countLabel {
     return _countLabelTemp;
 }
-    
+
 - (void)ZOEPlaceholderTextViewLimit:(NSInteger)limit completed:(void(^)())block {
     self.limit = limit;
     self.MyBlock = block;
     [self countLabelTemp];
 };
-    
-    
-    //计算字符串字符个数
+
+
+//计算字符串字符个数
 - (int)charNumber {
     int strlength = 0;
     char* p = (char*)[self.text cStringUsingEncoding:NSUnicodeStringEncoding];
@@ -166,8 +175,8 @@
     //    NSData* da = [self dataUsingEncoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGB_18030_2000)];
     //    return [da length];
 }
-    
-    //是否包含emoji表情
+
+//是否包含emoji表情
 + (BOOL)stringContainsEmoji:(NSString *)string {
     __block BOOL returnValue = NO;
     
@@ -205,5 +214,5 @@
     
     return returnValue;
 }
-    
-    @end
+
+@end

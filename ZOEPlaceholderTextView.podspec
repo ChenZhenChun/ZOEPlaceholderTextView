@@ -3,7 +3,7 @@ Pod::Spec.new do |s|
 s.name              = "ZOEPlaceholderTextView"
 
 #更新代码必须修改版本号
-s.version           = "1.0.1"
+s.version           = "1.0.2"
 s.summary           = "a PlaceholderTextView for ios."
 s.description       = <<-DESC
 It is a ZOEPlaceholderTextView used on iOS, which implement by Objective-C.
