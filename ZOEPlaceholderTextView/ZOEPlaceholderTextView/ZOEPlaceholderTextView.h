@@ -23,13 +23,14 @@ typedef enum : NSUInteger {
 @property (nonatomic,readonly,assign)       UILabel *countLabel;
 @property (nonatomic,assign)  BOOL          isSupportEmoji;//Default is no。
 @property (nonatomic,assign) UIEdgeInsets   textViewContainerInset;//内容内边距
+@property (nonatomic,copy) void(^textDidChange)(void);
 /**
  输入的字数限制
 
  @param limit 现在多少字
  @param block 字数超限block回调
  */
-- (void)ZOEPlaceholderTextViewLimit:(NSInteger)limit completed:(void(^)())block;
+- (void)ZOEPlaceholderTextViewLimit:(NSInteger)limit completed:(void(^)(void))block;
 
 
 

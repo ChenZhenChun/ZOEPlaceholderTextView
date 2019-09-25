@@ -15,7 +15,7 @@
 @property (nonatomic,strong) UILabel *placeHolderLabel;
 @property (nonatomic,assign) NSInteger limit;
 @property (nonatomic,strong) UILabel *countLabelTemp;//计数
-@property (nonatomic,copy) void (^MyBlock)();
+@property (nonatomic,copy) void (^MyBlock)(void);
 @end
 
 @implementation ZOEPlaceholderTextView
@@ -61,7 +61,6 @@
     _placeholder = placeholder;
     self.placeHolderLabel.text = self.placeholder;
     [self.placeHolderLabel sizeToFit];
-    [self sendSubviewToBack:self.placeHolderLabel];
 }
 
 - (UILabel *)placeHolderLabel {
@@ -78,13 +77,14 @@
         _placeHolderLabel.alpha = 1;
         _placeHolderLabel.tag = 999;
         [self addSubview:_placeHolderLabel];
+        [self sendSubviewToBack:_placeHolderLabel];
     }
     return _placeHolderLabel;
 }
 
 - (void)setText:(NSString *)text {
     [super setText:text];
-    if(text.length == 0 && self.placeholder.length > 0) {
+    if(text.length == 0 && self.placeHolderLabel.text.length > 0) {
         [[self viewWithTag:999] setAlpha:1];
     }
     [self textChanged:nil];
@@ -107,7 +107,10 @@
 }
 
 - (void)textChanged:(NSNotification *)notification {
-    if(self.placeholder.length != 0) {
+    if (self.textDidChange) {
+        self.textDidChange();
+    }
+    if(self.placeHolderLabel.text.length != 0) {
         [UIView animateWithDuration:0.25 animations:^{
             if(self.text.length == 0) {
                 [[self viewWithTag:999] setAlpha:1];
@@ -149,7 +152,7 @@
     return _countLabelTemp;
 }
 
-- (void)ZOEPlaceholderTextViewLimit:(NSInteger)limit completed:(void(^)())block {
+- (void)ZOEPlaceholderTextViewLimit:(NSInteger)limit completed:(void (^)(void))block {
     self.limit = limit;
     self.MyBlock = block;
     [self countLabelTemp];
